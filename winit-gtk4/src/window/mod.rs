@@ -220,13 +220,18 @@ impl UnownedWindow {
             .default_width(surface_size.width as i32)
             .default_height(surface_size.height as i32)
             .resizable(attributes.resizable)
-            .decorated(decorated)
             // GTK only exposes the close button through the native toplevel API.
             // Minimize/maximize hints require taking over the titlebar, so winit-gtk4 leaves them
             // to the compositor/window manager.
             .deletable(enabled_buttons.contains(WindowButtons::CLOSE))
             .maximized(maximized)
             .fullscreened(fullscreened);
+
+        if !decorated {
+            let titlebar = gtk4::HeaderBar::new();
+            titlebar.set_visible(false);
+            builder = builder.titlebar(titlebar);
+        }
 
         // GTK4/GDK exposes minimum toplevel size, but no maximum-size constraint.
         if let Some(min_surface_size) = attributes.min_surface_size {
